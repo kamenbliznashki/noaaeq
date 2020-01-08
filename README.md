@@ -47,7 +47,7 @@ read_delim(filepath, delim = "\t") %>%
 
 ## Documentation
 
-See [the package vignette](doc/introduction.html) for:
+See the package vignette for:
 
   - data loading and cleaning
   - timeline visualization for one or more countries
