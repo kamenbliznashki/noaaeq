@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![Build
+Status](https://travis-ci.org/kamenbliznashki/noaaeq.svg?branch=master)](https://travis-ci.org/kamenbliznashki/noaaeq)
 <!-- badges: end -->
 
 Visualization geoms on NOAA Significant Earthquake Database
