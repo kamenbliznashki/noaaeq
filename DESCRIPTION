@@ -1,0 +1,19 @@
+Package: noaaeq
+Type: Package
+Title: Visualize NOAA significant earthquakes dataset
+Version: 0.1.0
+Author: Kamen Bliznashki
+Maintainer: Kamen Bliznashki <kamen.bliznashki@gmail.com>
+Description: Load, clean, and visualize the NOAA signficant earthquakes
+  dataset. Plot timelines by country and visualize maps with the 
+  location and magnitude of earthquakes.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Imports: dplyr, ggplot2, leaflet, lubridate, purrr, stringr, tidyr, readr, tidyverse, utils, rlang
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0)
+VignetteBuilder: knitr

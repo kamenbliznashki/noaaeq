@@ -1,0 +1,114 @@
+---
+title: "Introduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## About
+
+This package provides visualizations over the U.S. National Oceanographic and Atmospheric Administration (NOAA) dataset on significant earthquakes around the world. The data can be accessed [here](https://www.ngdc.noaa.gov/nndc/struts/form?t=101650&s=1&d=1). As snapshot as of 1/7/2020 is also included in the package and can be accessed via `system.file("extdata", "earthquakes.txt", package = "noaaeq")`.
+
+## Loading the package
+
+```{r setup, message=FALSE}
+library(noaaeq)
+
+# load additional packages used in the examples below
+library(tidyverse)
+```
+
+## Data loading and cleaning
+
+We can load the NOAA dataset using the build-in raw data.
+
+Variable definitions can be found on the NOAA website [here](https://www.ngdc.noaa.gov/nndc/struts/results?&t=101650&s=225&d=225). (Note the negative dates are BCE and positive are AD)
+
+Cleaning the data specifically includes the following:
+
+* conforming all variable data types
+* uniting the date information columns into a single DATE variable
+* cleaning the LOCATION_NAME information to format and keep only the specific site location excluding country, state, etc.
+
+
+```{r data, results='hide', warning=FALSE, message=FALSE}
+filepath = system.file("extdata", "earthquakes.txt", package = "noaaeq")
+
+# load and clean data
+df = read_delim(filepath, delim = "\t") %>%
+  eq_clean_data()
+
+# observe variables and data types after cleaning (not run)
+str(df)
+```
+
+## Timeline Geom
+
+Using the `geom_timeline` geom, we can visualize the times at which earthquakes occur within certain countries, in addition showing the magnitudes (i.e. Richter scale value) and the number of deaths associated with each earthquake.
+
+The following displays earthquake timeline data for the USA from the years 2000 - 2016.
+
+```{r timeline_simple, fig.width=6}
+df %>%
+  filter('2000-01-01' < DATE & DATE < '2017-01-01', COUNTRY == 'USA') %>%
+  ggplot() +
+  geom_timeline(aes(x=DATE, size=EQ_PRIMARY, color=DEATHS)) +
+  scale_y_continuous(limits = c(0, 4)) +
+  labs(y='', size='Richter scale value', color = '# deaths') +
+  theme_timeline()
+```
+
+## Timeline Geom with labels
+
+Using the `geom_timeline_label` geom, we can further add labels for the earthquake data above with the locations of the `n_max` number of earthquakes. 
+
+The following displays earthquake timeline data for the USA from the years 2000 - 2016, now including labels for the strongest 5 earthquakes.
+
+```{r timeline_labels, fig.width=6}
+df %>%
+  filter('2000-01-01' < DATE & DATE < '2017-01-01', COUNTRY == 'USA') %>%
+  ggplot() +
+  geom_timeline_label(aes(x=DATE, size=EQ_PRIMARY, color=DEATHS, label=LOCATION_NAME)) +
+  scale_y_continuous(limits = c(0, 4)) +
+  labs(y='', size='Richter scale value', color = '# deaths') +
+  theme_timeline()
+```
+
+## Timeline Geom with labels for multiple countries
+
+Using the `geom_timeline_label` geom, we can also plot multiple countries and label the strongest earthquakes for each country. 
+The following displays earthquake timeline data for the USA and China from the years 2000 - 2016, including labels for the strongest 5 earthquakes.
+
+```{r timeline_multi, fig.height=5, fig.width=6}
+df %>%
+  filter('2000-01-01' < DATE & DATE < '2017-01-01',
+         COUNTRY %in% c('USA', 'CHINA')) %>%
+  ggplot() +
+  geom_timeline_label(aes(x=DATE, group=COUNTRY, size=EQ_PRIMARY, color=DEATHS, label=LOCATION_NAME)) +
+  scale_y_continuous(limits=c(0, 4)) +
+  labs(y='', size='Richter scale value', color = '# deaths') +
+  theme_timeline()
+```
+
+## Mapping of earthquake locations
+
+Using the function `eq_map`, we can map the epicenters of earthquakes and include interactive statistics.
+Note the function `eq_create_labels` creates html labels providing the location name, magnitude, and total deaths at each earthquake location.
+
+The following maps earthquakes in Mexico after the year 2000. We can click on an earthquake and see its location, magnitude and number of total deaths if those data are available.
+
+```{r map, out.width='95%'}
+df %>%
+  filter(COUNTRY == 'MEXICO' & DATE >= '2000-01-01') %>%
+  mutate(popup_text = eq_create_label(.)) %>%
+  eq_map(annot_col = 'popup_text')
+```
